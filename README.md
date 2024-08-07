@@ -4,6 +4,14 @@
 
 This project is a practice to create a simple file system implementation.
 
+## Install
+
+[First, you need to install Rust on your system.](https://www.rust-lang.org/tools/install)
+
+## Run
+
+In project folder, execute: `cargo run`
+
 ## License
 
 See [the LICENSE file](LICENSE).
