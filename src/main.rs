@@ -159,9 +159,11 @@ fn delete_file<'a>(
 fn main() {
     println!("Easy File System (EFS)");
     println!();
-    println!("Creating new file system...");
 
+    println!("Creating new file system...");
     let mut fs: FileSystem = FileSystem::new();
+    println!("File system created");
+    println!();
 
     let my_filename_str: &str = "myfile.txt";
     let my_content_str: &str = "Hey! This is my file. And it is awesome.";
@@ -178,6 +180,4 @@ fn main() {
         Ok(..) => println!("{my_filename_str} file successfully added."),
         Err(e) => println!("Error during adding: {e}"),
     }
-
-    println!("File system created");
 }
