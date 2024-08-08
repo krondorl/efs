@@ -12,6 +12,10 @@ This project is a practice to create a simple file system implementation.
 
 In project folder, execute: `cargo run`
 
+## Build
+
+Run this command: `cargo build --release`
+
 ## License
 
 See [the LICENSE file](LICENSE).
