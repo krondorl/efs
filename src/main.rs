@@ -10,6 +10,7 @@ struct Superblock {
     free_space: u16,
 }
 
+#[derive(Debug, Clone, Copy)]
 struct INode {
     filename: [u8; FILENAME_LENGTH as usize],
     content: [u8; CONTENT_LENGTH as usize],
@@ -21,16 +22,24 @@ struct FileSystem {
     inodes: [INode; MAX_FILES as usize],
 }
 
-fn init_filesystem(fs: &mut FileSystem) -> Result<(), ()> {
-    fs.superblock.total_inodes = MAX_FILES as u16;
-    fs.superblock.used_inodes = 0;
-    fs.superblock.free_space = MAX_FILES as u16;
-    for i in 0..MAX_FILES {
-        fs.inodes[i as usize].is_used = false;
-        fs.inodes[i as usize].content = [0; CONTENT_LENGTH as usize];
-        fs.inodes[i as usize].filename = [0; FILENAME_LENGTH as usize];
+impl FileSystem {
+    fn init() -> Self {
+        let superblock = Superblock {
+            total_inodes: MAX_FILES as u16,
+            used_inodes: 0,
+            free_space: MAX_FILES as u16,
+        };
+
+        let inode = INode {
+            filename: [0; FILENAME_LENGTH as usize],
+            content: [0; CONTENT_LENGTH as usize],
+            is_used: false,
+        };
+
+        let inodes: [INode; MAX_FILES as usize] = [inode; MAX_FILES as usize];
+
+        FileSystem { superblock, inodes }
     }
-    Ok(())
 }
 
 fn add_file<'a>(
