@@ -1,10 +1,13 @@
 // Copyright 2024 Adam Burucs. MIT license.
 
+use colored::*;
+
 const MAX_FILES: u8 = 32;
 const FILENAME_LENGTH: u8 = 32;
 const CONTENT_LENGTH: u16 = 1024;
 
 #[allow(dead_code)]
+#[derive(Debug)]
 struct Superblock {
     total_inodes: u16,
     used_inodes: u16,
@@ -32,14 +35,6 @@ impl Superblock {
             used_inodes: 0,
             free_space: MAX_FILES as u16,
         }
-    }
-
-    fn total_inodes(&self) -> u16 {
-        self.total_inodes
-    }
-
-    fn set_total_inodes(&mut self, new_total_inodes: u16) {
-        self.total_inodes = new_total_inodes;
     }
 
     fn used_inodes(&self) -> u16 {
@@ -102,6 +97,10 @@ impl FileSystem {
         Self { superblock, inodes }
     }
 
+    fn get_info(&self) -> &Superblock {
+        &self.superblock
+    }
+
     fn add_file<'a>(
         &mut self,
         filename: &'a [u8; FILENAME_LENGTH as usize],
@@ -132,7 +131,7 @@ impl FileSystem {
         for i in 0..MAX_FILES {
             if self.inodes[i as usize].is_used() && self.inodes[i as usize].filename() == *filename
             {
-                return Ok(self.inodes[i as usize].content);
+                return Ok(self.inodes[i as usize].content());
             }
         }
         Err("File not found.")
@@ -158,28 +157,58 @@ impl FileSystem {
     }
 }
 
-fn main() {
-    println!("Easy File System (EFS)");
-    println!();
+fn make_filename_bytes(filename: &str) -> [u8; FILENAME_LENGTH as usize] {
+    let mut filename_tmp: [u8; FILENAME_LENGTH as usize] = [0; FILENAME_LENGTH as usize];
+    filename_tmp[..filename.len()].copy_from_slice(filename.as_bytes());
+    filename_tmp
+}
 
+fn make_content_bytes(content: &str) -> [u8; CONTENT_LENGTH as usize] {
+    let mut content_tmp: [u8; CONTENT_LENGTH as usize] = [0; CONTENT_LENGTH as usize];
+    content_tmp[..content.len()].copy_from_slice(content.as_bytes());
+    content_tmp
+}
+
+fn main() {
+    println!("{}", "Easy File System (EFS)".bright_white().on_blue());
+    println!();
     println!("Creating new file system...");
     let mut fs: FileSystem = FileSystem::new();
     println!("File system created");
     println!();
 
-    let my_filename_str: &str = "myfile.txt";
-    let my_content_str: &str = "Hey! This is my file. And it is awesome.";
+    println!("{}", "File system information".bright_yellow());
+    println!("{:?}", fs.get_info());
+    println!();
 
-    let mut filename_tmp: [u8; FILENAME_LENGTH as usize] = [0; FILENAME_LENGTH as usize];
-    filename_tmp[..my_filename_str.len()].copy_from_slice(my_filename_str.as_bytes());
+    let filename_str = "myfile.txt";
+    let filename_bytes = make_filename_bytes(filename_str);
+    let content_bytes = make_content_bytes("Hey! This is my file. And it is awesome.");
 
-    let mut content_tmp: [u8; CONTENT_LENGTH as usize] = [0; CONTENT_LENGTH as usize];
-    content_tmp[..my_content_str.len()].copy_from_slice(my_content_str.as_bytes());
-
-    let file_add = fs.add_file(&filename_tmp, &content_tmp);
+    let file_add = fs.add_file(&filename_bytes, &content_bytes);
 
     match file_add {
-        Ok(..) => println!("{my_filename_str} file successfully added."),
+        Ok(..) => println!("{filename_str} file successfully added."),
         Err(e) => println!("Error during adding: {e}"),
     }
+    println!();
+
+    println!("Trying to read {filename_str}...");
+    let file_read = fs.read_file(&filename_bytes);
+    match file_read {
+        Ok(read_content) => {
+            println!("File contents are the following:");
+            println!("{:?}", read_content);
+        }
+        Err(e) => println!("Error during reading: {e}"),
+    }
+
+    println!();
+    println!("Trying to delete {filename_str}...");
+    let file_delete = fs.delete_file(&filename_bytes);
+    match file_delete {
+        Ok(..) => println!("{filename_str} file successfully deleted."),
+        Err(e) => println!("Error during deleting: {e}"),
+    }
+    println!();
 }
