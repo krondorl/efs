@@ -137,23 +137,25 @@ impl FileSystem {
         }
         Err("File not found.")
     }
-}
 
-#[allow(dead_code)]
-fn delete_file<'a>(
-    fs: &'a mut FileSystem,
-    filename: &'a [u8; FILENAME_LENGTH as usize],
-) -> Result<(), &'a str> {
-    for i in 0..MAX_FILES {
-        if fs.inodes[i as usize].is_used && fs.inodes[i as usize].filename == *filename {
-            fs.inodes[i as usize].content = [0; CONTENT_LENGTH as usize];
-            fs.inodes[i as usize].is_used = false;
-            fs.superblock.used_inodes -= 1;
-            fs.superblock.free_space += 1;
-            return Ok(());
+    fn delete_file<'a>(
+        &mut self,
+        filename: &'a [u8; FILENAME_LENGTH as usize],
+    ) -> Result<(), &'a str> {
+        for i in 0..MAX_FILES {
+            if self.inodes[i as usize].is_used() && self.inodes[i as usize].filename() == *filename
+            {
+                self.inodes[i as usize].set_content([0; CONTENT_LENGTH as usize]);
+                self.inodes[i as usize].set_is_used(false);
+                self.superblock
+                    .set_used_inodes(self.superblock.used_inodes() - 1);
+                self.superblock
+                    .set_free_space(self.superblock.free_space() + 1);
+                return Ok(());
+            }
         }
+        Err("File not found.")
     }
-    Err("File not found.")
 }
 
 fn main() {
