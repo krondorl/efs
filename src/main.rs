@@ -14,7 +14,6 @@ struct Superblock {
     free_space: u16,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 struct INode {
     filename: [u8; FILENAME_LENGTH as usize],
@@ -22,7 +21,6 @@ struct INode {
     is_used: bool,
 }
 
-#[allow(dead_code)]
 struct FileSystem {
     superblock: Superblock,
     inodes: [INode; MAX_FILES as usize],
