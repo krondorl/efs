@@ -6,7 +6,6 @@ const MAX_FILES: u8 = 32;
 const FILENAME_LENGTH: u8 = 32;
 const CONTENT_LENGTH: u16 = 1024;
 
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Superblock {
     total_inodes: u16,
@@ -33,6 +32,10 @@ impl Superblock {
             used_inodes: 0,
             free_space: MAX_FILES as u16,
         }
+    }
+
+    fn total_inodes(&self) -> u16 {
+        self.total_inodes
     }
 
     fn used_inodes(&self) -> u16 {
@@ -95,8 +98,13 @@ impl FileSystem {
         Self { superblock, inodes }
     }
 
-    fn get_info(&self) -> &Superblock {
-        &self.superblock
+    fn get_info(&self) -> String {
+        format!(
+            "Total inodes: {}, used inodes: {}, free inodes {}",
+            self.superblock.total_inodes(),
+            self.superblock.used_inodes(),
+            self.superblock.free_space()
+        )
     }
 
     fn add_file<'a>(
